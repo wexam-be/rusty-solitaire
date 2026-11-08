@@ -242,6 +242,49 @@ fn undo_restores_scheme_state() {
     assert_eq!(game.table.status_message, "Stock left: 24   Redeals left: 1");
 }
 
+/// Play whole games of Hearts the way the board does (a press tells the
+/// game which card, the release clicks), letting the computer players run.
+#[test]
+fn hearts_plays_to_the_end() {
+    for seed in 1..=4u64 {
+        let mut game = Game::new("hearts", seed).unwrap();
+        let mut clicks = 0;
+        while game.state < GameState::Over {
+            clicks += 1;
+            assert!(clicks < 5000, "seed {seed}: the game never ended");
+            game.start();
+            if game.can_deal() {
+                game.deal();
+            } else {
+                // Click the first card in your hand that the game takes:
+                // while passing that moves it to the pass pile, in play it
+                // must be a legal card.
+                let n = game.table.cards(0).len();
+                let played = (0..n).any(|i| {
+                    game.drag_valid(0, i);
+                    game.click(0)
+                });
+                assert!(played || n == 0 || game.has_delayed_call(), "seed {seed}: no card in your hand can be played");
+                if !played {
+                    // Between hands, any click deals.
+                    game.click(5);
+                }
+            }
+            run_autoplay(&mut game);
+            let errors = game.rules.take_errors();
+            assert!(errors.is_empty(), "seed {seed}: {errors:?}");
+            assert!(total_cards(&game.table).values().all(|&n| n == 1));
+        }
+        let score: i64 = game.table.score.parse().unwrap();
+        assert!(score >= 0);
+        let status = &game.table.status_message;
+        assert!(!game.table.labels.is_empty(), "{status}");
+        if game.state == GameState::Over {
+            assert!(game.game_over_message().is_some_and(|m| m.contains("won with")));
+        }
+    }
+}
+
 /// Debug helper: replay a game's random run and print the table when the
 /// rule code first fails. Run with `cargo test -- --ignored replay`.
 #[test]

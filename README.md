@@ -11,7 +11,7 @@ that looks like the GTK 3 original on Linux, Windows and macOS. The UI uses
 
 | Done | Not yet |
 |---|---|
-| **All 91 Aisleriot games** (Game → Select Game…), with their rule options, hints and autoplay | Notarized macOS / code-signed Windows builds |
+| **All 91 Aisleriot games** (Game → Select Game…), with their rule options, hints and autoplay, plus Hearts against three computer players | Notarized macOS / code-signed Windows builds |
 | Card table ported from `board-noclutter.c`: layout, fanning, drag & drop, drop highlight, right-click reveal, double-click, click-to-move | Animations |
 | Keyboard play on the board (focus outline, Space to select, Return to move), Help → Keyboard Shortcuts | Translations |
 | Touch screens: tap, double-tap, drag with a finger, long-press to see a covered card | |
@@ -215,7 +215,18 @@ build renders its 1024 px icon from the large SVG itself. Both need `rsvg-conver
 The games run on the original Aisleriot rule files, so they behave exactly like the
 original. `cargo test` plays every game with random moves to check that the rule code
 never fails and never duplicates a card. To add a game, drop its `.scm` file into
-`assets/games/`.
+`assets/games/`; a game AisleRiot doesn't have also needs a rules page in
+`assets/help/games/` (DocBook, like AisleRiot's) before `tools/gen-help.py` is run.
+
+`assets/games/hearts.scm` is the one game that isn't AisleRiot's: Hearts against three
+computer players. It uses two additions to the rule-file interface: `(delayed-call proc ms)`
+waits `ms` milliseconds (so the computer players' cards come down one by one) and
+`(delayed-call-pending?)`; a `game-over-message` variable gives the text of the
+"you lost" dialog; and for its table, `(set-slot-scale! slot s)` draws a slot's cards smaller,
+`(set-slot-fan! slot spread rotation)` holds them in a fan, `(hide-empty-slot! slot)` leaves
+out the outline of an empty slot, `(center-slot! slot)` centres a fanned-out slot on its
+position, and `(set-table-labels! '((x y text align size highlight) ...))` writes text on
+the table.
 
 ## License
 

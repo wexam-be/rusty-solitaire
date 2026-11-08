@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Rules page for Hearts, which is in Rusty Solitaire but not in AisleRiot.
+     Copyright (C) 2026 The Rusty Solitaire authors. GNU FDL, like the rest
+     of the manual. -->
+<sect1 id="Hearts"><sect1info>
+    <author>
+      <firstname>The Rusty Solitaire</firstname>
+      <surname>authors</surname>
+    </author>
+  </sect1info>
+
+  <title>Hearts</title>
+
+  <sect2><title>Setup</title>
+
+  <informaltable>
+    <tgroup cols="2"><tbody>
+	<row>
+	  <entry>Type of Deck</entry>
+	  <entry>Standard Deck, aces high</entry>
+	</row>
+	<row>
+	  <entry>Players</entry>
+	  <entry>
+	    You, at the bottom, against three computer players with a new
+	    random name each game, on the left, at the top and on the right.
+	    Play goes clockwise, starting to your left.
+	  </entry>
+	</row>
+	<row>
+	  <entry>Hands</entry>
+	  <entry>
+	    Each player is dealt 13 cards. Your cards are face up along the
+	    bottom; the computer players hold theirs face down in small fans.
+	  </entry>
+	</row>
+	<row>
+	  <entry>Trick</entry>
+	  <entry>
+	    The four overlapping cards in the middle, one from each player.
+	  </entry>
+	</row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+
+  </sect2>
+
+  <sect2><title>Goal</title>
+  <para>
+    Take as few hearts and as little of the queen of spades as you can, and
+    have the lowest score when someone reaches 100 points.
+  </para>
+  </sect2>
+
+  <sect2><title>Rules</title>
+  <para>
+    Before each hand is played, every player passes three cards: to the
+    player on the left in the first hand, to the right in the second,
+    across in the third, and no passing in the fourth; then it
+    starts again. Click three cards in your hand to put them on the pass
+    pile, and click one there to take it back. Then click one of the other
+    players' hands, or choose Deal, to pass them. The status bar says
+    which cards you received.
+  </para>
+  <para>
+    The player with the two of clubs leads it to the first trick. The
+    others must follow suit if they can; a player who can't may play any
+    card. The highest card of the suit that was led takes the trick, and
+    whoever takes it leads the next one. Click a card in your hand to play
+    it when it is your turn.
+  </para>
+  <para>
+    No hearts and not the queen of spades may be played on the first
+    trick, unless a player has nothing else. Hearts can't be led until a
+    heart has been played on an earlier trick (hearts are "broken"),
+    unless the leader holds nothing but hearts.
+  </para>
+  <para>
+    When all 13 tricks have been played, the hand is scored. Click, or
+    choose Deal, to deal the next one. The game ends after the hand in
+    which someone reaches 100 points. You win if nobody has fewer points
+    than you.
+  </para>
+  </sect2>
+
+  <sect2><title>Scoring</title>
+  <para>
+    Each heart you take counts 1 point, and the queen of spades 13, which
+    makes 26 points in each hand. If one player takes all 26, they have
+    "shot the moon": they score nothing for that hand and every other
+    player scores 26.
+  </para>
+  <para>
+    The table in the top left corner shows everyone's points for this hand
+    and their total; the Score box shows your total.
+  </para>
+  </sect2>
+
+  <sect2><title>Strategy</title>
+  <para>
+    Pass the queen, king and ace of spades unless you have plenty of low
+    spades to protect them, and high hearts. Passing every card of a short
+    suit leaves you void in it, so you can throw away dangerous cards when
+    that suit is led. Keep low cards to duck under the trick when hearts
+    are about. Hint suggests a card, chosen the way the computer players
+    choose theirs.
+  </para>
+  </sect2>
+</sect1>

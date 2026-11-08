@@ -584,7 +584,8 @@ impl Ui {
     fn after_move(self: &Rc<Self>, autoplay: bool) {
         if autoplay {
             let ui = self.clone();
-            self.autoplay_timer.start(TimerMode::SingleShot, AUTOPLAY_DELAY, move || {
+            let delay = self.app.borrow_mut().game.delayed_call_delay().unwrap_or(AUTOPLAY_DELAY);
+            self.autoplay_timer.start(TimerMode::SingleShot, delay, move || {
                 let again = {
                     let mut app = ui.app.borrow_mut();
                     app.game.run_delayed_call();
@@ -605,9 +606,10 @@ impl Ui {
                     &[("close", "Close"), ("new-game", "New Game")],
                 );
             } else {
+                let message = self.app.borrow_mut().game.game_over_message();
                 self.show_dialog(
                     Dialog::GameOver,
-                    "There are no more moves",
+                    message.as_deref().unwrap_or("There are no more moves"),
                     &[("undo", "Undo Move"), ("close", "Close"), ("restart", "Restart"), ("new-game", "New Game")],
                 );
             }

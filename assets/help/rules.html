@@ -83,7 +83,7 @@ footer { border-top: 1px solid var(--line); color: var(--ink-soft); font-size: .
 </div></header>
 <main>
 <div class="page" id="index" data-title="Contents">
-<div class="hero"><div class="wrap"><h1>Rusty Solitaire Help</h1><p>How to play, and the rules of all 91 games.</p></div></div>
+<div class="hero"><div class="wrap"><h1>Rusty Solitaire Help</h1><p>How to play, and the rules of all 92 games.</p></div></div>
 <div class="wrap layout"><article class="rules">
 
 <section id="index--playing">
@@ -160,6 +160,7 @@ running out of moves. Turn them off or on with <em>Control → Sound</em>.</p>
 <li data-name="golf"><a href="#golf"><strong>Golf</strong><span>Move all cards to Waste.</span></a></li>
 <li data-name="gypsy"><a href="#gypsy"><strong>Gypsy</strong><span>Move all cards to the Foundation piles.</span></a></li>
 <li data-name="hamilton"><a href="#hamilton"><strong>Hamilton</strong><span>Move all cards to the Foundation piles.</span></a></li>
+<li data-name="hearts"><a href="#hearts"><strong>Hearts</strong><span>Take as few hearts and as little of the queen of spades as you can, and have the lowest score when someone reaches 100 points.</span></a></li>
 <li data-name="helsinki"><a href="#helsinki"><strong>Helsinki</strong><span>Remove all cards.</span></a></li>
 <li data-name="hopscotch"><a href="#hopscotch"><strong>Hopscotch</strong><span>Move all cards on to Foundations.</span></a></li>
 <li data-name="isabel"><a href="#isabel"><strong>Isabel</strong><span>Remove all cards.</span></a></li>
@@ -1811,6 +1812,44 @@ cards on top of it, move the focus to the pile they should go to and press <kbd>
 </article><aside><nav class="toc"><a href="#hamilton--setup">Setup</a><a href="#hamilton--goal">Goal</a><a href="#hamilton--rules">Rules</a><a href="#hamilton--scoring">Scoring</a><a href="#hamilton--strategy">Strategy</a><a href="#hamilton--dedication">Dedication</a><a href="#hamilton--references">References</a></nav><p class="muted">Words like <em>Tableau</em> and <em>Foundation</em> are explained in the <a href="#glossary">glossary</a>.</p></aside></div>
 <nav class="wrap pager">
 <a href="#gypsy"><span>← Previous</span>Gypsy</a>
+<a href="#hearts"><span>Next →</span>Hearts</a>
+</nav>
+</div>
+<div class="page" id="hearts" data-title="Hearts">
+<div class="hero"><div class="wrap"><h1>Hearts</h1><p><span class="tag">Standard Deck, aces high</span> Rules written by The Rusty Solitaire authors for GNOME AisleRiot.</p></div></div>
+<div class="wrap layout"><article class="rules">
+<section id="hearts--setup">
+<h2>Setup</h2>
+<table class="setup">
+<tr><th scope="row">Type of Deck</th><td>Standard Deck, aces high</td></tr>
+<tr><th scope="row">Players</th><td>You, at the bottom, against three computer players with a new random name each game, on the left, at the top and on the right. Play goes clockwise, starting to your left.</td></tr>
+<tr><th scope="row">Hands</th><td>Each player is dealt 13 cards. Your cards are face up along the bottom; the computer players hold theirs face down in small fans.</td></tr>
+<tr><th scope="row">Trick</th><td>The four overlapping cards in the middle, one from each player.</td></tr>
+</table>
+</section>
+<section id="hearts--goal">
+<h2>Goal</h2>
+<p>Take as few hearts and as little of the queen of spades as you can, and have the lowest score when someone reaches 100 points.</p>
+</section>
+<section id="hearts--rules">
+<h2>Rules</h2>
+<p>Before each hand is played, every player passes three cards: to the player on the left in the first hand, to the right in the second, across in the third, and no passing in the fourth; then it starts again. Click three cards in your hand to put them on the pass pile, and click one there to take it back. Then click one of the other players&#x27; hands, or choose Deal, to pass them. The status bar says which cards you received.</p>
+<p>The player with the two of clubs leads it to the first trick. The others must follow suit if they can; a player who can&#x27;t may play any card. The highest card of the suit that was led takes the trick, and whoever takes it leads the next one. Click a card in your hand to play it when it is your turn.</p>
+<p>No hearts and not the queen of spades may be played on the first trick, unless a player has nothing else. Hearts can&#x27;t be led until a heart has been played on an earlier trick (hearts are &quot;broken&quot;), unless the leader holds nothing but hearts.</p>
+<p>When all 13 tricks have been played, the hand is scored. Click, or choose Deal, to deal the next one. The game ends after the hand in which someone reaches 100 points. You win if nobody has fewer points than you.</p>
+</section>
+<section id="hearts--scoring">
+<h2>Scoring</h2>
+<p>Each heart you take counts 1 point, and the queen of spades 13, which makes 26 points in each hand. If one player takes all 26, they have &quot;shot the moon&quot;: they score nothing for that hand and every other player scores 26.</p>
+<p>The table in the top left corner shows everyone&#x27;s points for this hand and their total; the Score box shows your total.</p>
+</section>
+<section id="hearts--strategy">
+<h2>Strategy</h2>
+<p>Pass the queen, king and ace of spades unless you have plenty of low spades to protect them, and high hearts. Passing every card of a short suit leaves you void in it, so you can throw away dangerous cards when that suit is led. Keep low cards to duck under the trick when hearts are about. Hint suggests a card, chosen the way the computer players choose theirs.</p>
+</section>
+</article><aside><nav class="toc"><a href="#hearts--setup">Setup</a><a href="#hearts--goal">Goal</a><a href="#hearts--rules">Rules</a><a href="#hearts--scoring">Scoring</a><a href="#hearts--strategy">Strategy</a></nav><p class="muted">Words like <em>Tableau</em> and <em>Foundation</em> are explained in the <a href="#glossary">glossary</a>.</p></aside></div>
+<nav class="wrap pager">
+<a href="#hamilton"><span>← Previous</span>Hamilton</a>
 <a href="#helsinki"><span>Next →</span>Helsinki</a>
 </nav>
 </div>
@@ -1845,7 +1884,7 @@ cards on top of it, move the focus to the pile they should go to and press <kbd>
 </section>
 </article><aside><nav class="toc"><a href="#helsinki--setup">Setup</a><a href="#helsinki--goal">Goal</a><a href="#helsinki--rules">Rules</a><a href="#helsinki--scoring">Scoring</a><a href="#helsinki--strategy">Strategy</a></nav><p class="muted">Words like <em>Tableau</em> and <em>Foundation</em> are explained in the <a href="#glossary">glossary</a>.</p></aside></div>
 <nav class="wrap pager">
-<a href="#hamilton"><span>← Previous</span>Hamilton</a>
+<a href="#hearts"><span>← Previous</span>Hearts</a>
 <a href="#hopscotch"><span>Next →</span>Hopscotch</a>
 </nav>
 </div>
@@ -3869,6 +3908,7 @@ among others. Each game's rule file and its page in the manual:</p>
 <tr><th scope="row"><a href="#golf">Golf</a></th><td>Rosanna Yuen</td><td>Rosanna Yuen</td></tr>
 <tr><th scope="row"><a href="#gypsy">Gypsy</a></th><td>Rosanna Yuen</td><td>Rosanna Yuen</td></tr>
 <tr><th scope="row"><a href="#hamilton">Hamilton</a></th><td>Timothy Goodwin</td><td>Timothy Goodwin</td></tr>
+<tr><th scope="row"><a href="#hearts">Hearts</a></th><td>The Rusty Solitaire authors</td><td>The Rusty Solitaire authors</td></tr>
 <tr><th scope="row"><a href="#helsinki">Helsinki</a></th><td>Rosanna Yuen</td><td>Rosanna Yuen</td></tr>
 <tr><th scope="row"><a href="#hopscotch">Hopscotch</a></th><td>Rosanna Yuen</td><td>Rosanna Yuen</td></tr>
 <tr><th scope="row"><a href="#isabel">Isabel</a></th><td>Rosanna Yuen</td><td>Rosanna Yuen</td></tr>

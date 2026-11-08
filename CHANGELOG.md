@@ -4,6 +4,20 @@ Every bug fix or improvement raises the minor version. The version is set in
 `Cargo.toml`; add a matching `<release>` to
 `packaging/linux/io.github.rustysolitaire.RustySolitaire.metainfo.xml`.
 
+## 0.6.0 — 2026-11-03
+
+- Hearts: the trick-taking card game, played against three computer
+  players. Pass three cards before each hand (left,
+  right, across, then no pass), then click a card to play it. Hearts count
+  1 point and the queen of spades 13; shooting the moon gives everyone
+  else 26. The game ends when someone reaches 100, and the lowest score
+  wins. Hint suggests a card, and Help on Hearts has the full rules.
+  The computer players get random names and hold their cards in small
+  fans; the trick is played in the middle, and the score table is on the
+  table in the top left corner.
+- Return on a focused card, and double clicks, now tell the game which
+  card was meant.
+
 ## 0.5.0 — 2026-10-29
 
 - A new application icon, the Rusty fan: four cards (felt-green and rust

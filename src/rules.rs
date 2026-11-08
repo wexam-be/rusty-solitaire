@@ -12,7 +12,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use crate::card::{Card, Rng, SUITS};
-use crate::game::{Expansion, Slot, SlotType, Table};
+use crate::game::{Expansion, Label, Slot, SlotType, Table};
 use crate::scheme::{err, Error, Interp, Result, Value};
 
 include!(concat!(env!("OUT_DIR"), "/game_files.rs"));
@@ -70,6 +70,8 @@ struct Host {
     lambdas: Vec<Value>,
     rng: Rng,
     delayed_call: Option<Value>,
+    /// How long the game asked to wait before the delayed call, in ms.
+    delayed_ms: Option<u64>,
     timeout: i64,
     /// Errors raised by the rule code, kept for tests.
     errors: Vec<String>,
@@ -201,6 +203,10 @@ fn add_slot(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
         slot_type,
         dx: None,
         dy: None,
+        scale: 1.0,
+        fan: None,
+        hide_empty: false,
+        centered: false,
     };
     let id = int_arg(id)? as usize;
     let slots = &mut host(i).table.slots;
@@ -235,6 +241,75 @@ fn set_slot_x_expansion(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
     let id = slot_index(i, &a[0])?;
     let dx = a[1].as_f64().ok_or_else(|| Error::new("set-slot-x-expansion!: not a number"))?;
     host(i).table.slots[id].dx = Some(dx);
+    Ok(Value::Nil)
+}
+
+// ---- Rusty Solitaire extensions, for games that aren't AisleRiot's ----
+
+fn number_arg(v: &Value, what: &str) -> Result<f64> {
+    v.as_f64().ok_or_else(|| Error::new(format!("{what}: not a number")))
+}
+
+/// (set-slot-scale! slot scale): draw the slot's cards `scale` times the
+/// normal size.
+fn set_slot_scale(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
+    let id = slot_index(i, &a[0])?;
+    let scale = number_arg(&a[1], "set-slot-scale!")?.clamp(0.1, 1.0);
+    host(i).table.slots[id].scale = scale;
+    Ok(Value::Nil)
+}
+
+/// (set-slot-fan! slot spread rotation): show all the slot's cards in a
+/// fan `spread` degrees wide, like a hand of cards held up; `rotation`
+/// turns the whole fan (0 points it up, 90 right, 180 down, -90 left).
+fn set_slot_fan(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
+    let id = slot_index(i, &a[0])?;
+    let spread = number_arg(&a[1], "set-slot-fan!")?;
+    let rotation = number_arg(&a[2], "set-slot-fan!")?;
+    host(i).table.slots[id].fan = Some((spread, rotation));
+    Ok(Value::Nil)
+}
+
+/// (hide-empty-slot! slot): draw no outline where the slot is when it is empty.
+fn hide_empty_slot(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
+    let id = slot_index(i, &a[0])?;
+    host(i).table.slots[id].hide_empty = true;
+    Ok(Value::Nil)
+}
+
+/// (center-slot! slot): spread the slot's cards evenly to both sides of
+/// its position, so that a fanned-out pile stays in the middle.
+fn center_slot(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
+    let id = slot_index(i, &a[0])?;
+    host(i).table.slots[id].centered = true;
+    Ok(Value::Nil)
+}
+
+/// (set-table-labels! '((x y text [align [size [highlight]]]) ...)): text
+/// on the table. align is left, center or right; size is the text height
+/// in card-sized units.
+fn set_table_labels(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
+    let mut labels = Vec::new();
+    for entry in a[0].iter() {
+        let items = entry.to_vec().ok_or_else(|| Error::new("set-table-labels!: bad label"))?;
+        let (Some(x), Some(y), Some(Value::Str(text))) = (items.first(), items.get(1), items.get(2)) else {
+            return err("set-table-labels!: bad label");
+        };
+        let align = match items.get(3).and_then(Value::as_sym).map(|s| s.name().to_string()).as_deref() {
+            Some("center") => 0,
+            Some("right") => 1,
+            _ => -1,
+        };
+        labels.push(Label {
+            x: number_arg(x, "set-table-labels!")?,
+            y: number_arg(y, "set-table-labels!")?,
+            text: text.to_string(),
+            align,
+            size: items.get(4).and_then(Value::as_f64).unwrap_or(0.15),
+            highlight: items.get(5).is_some_and(Value::is_true),
+        });
+    }
+    host(i).table.labels = labels;
     Ok(Value::Nil)
 }
 
@@ -291,7 +366,14 @@ fn delayed_call(i: &mut Interp, a: Vec<Value>) -> Result<Value> {
         return err("Already have a delayed callback pending.");
     }
     h.delayed_call = Some(a[0].clone());
+    // Rusty Solitaire extension: an optional delay, so that a game can pace
+    // the moves it makes itself (Hearts' computer players).
+    h.delayed_ms = a.get(1).map(int_arg).transpose()?.map(|ms| ms.max(0) as u64);
     Ok(Value::Bool(true))
+}
+
+fn delayed_call_pending(i: &mut Interp, _: Vec<Value>) -> Result<Value> {
+    Ok(Value::Bool(host(i).delayed_call.is_some()))
 }
 
 /// Rule errors are logged, like the original's exception dialog, and
@@ -322,7 +404,13 @@ fn install_bridge(i: &mut Interp) {
     i.define_builtin("update-score", 1, Some(1), update_score);
     i.define_builtin("get-timeout", 0, Some(0), get_timeout);
     i.define_builtin("set-timeout!", 1, Some(1), set_timeout);
-    i.define_builtin("delayed-call", 1, Some(1), delayed_call);
+    i.define_builtin("delayed-call", 1, Some(2), delayed_call);
+    i.define_builtin("delayed-call-pending?", 0, Some(0), delayed_call_pending);
+    i.define_builtin("set-slot-scale!", 2, Some(2), set_slot_scale);
+    i.define_builtin("set-slot-fan!", 3, Some(3), set_slot_fan);
+    i.define_builtin("hide-empty-slot!", 1, Some(1), hide_empty_slot);
+    i.define_builtin("center-slot!", 1, Some(1), center_slot);
+    i.define_builtin("set-table-labels!", 1, Some(1), set_table_labels);
     i.define_builtin("undo-set-sensitive", 1, Some(1), ignore);
     i.define_builtin("redo-set-sensitive", 1, Some(1), ignore);
     i.define_builtin("dealable-set-sensitive", 1, Some(1), ignore);
@@ -343,6 +431,7 @@ impl SchemeRules {
             lambdas: vec![Value::Unspecified; N_LAMBDAS],
             rng: Rng::new(0),
             delayed_call: None,
+            delayed_ms: None,
             timeout: 0,
             errors: Vec::new(),
         };
@@ -571,6 +660,21 @@ impl SchemeRules {
 
     pub fn take_delayed_call(&mut self) -> Option<Value> {
         host(&mut self.interp).delayed_call.take()
+    }
+
+    /// The delay the game asked for with the pending delayed call.
+    pub fn delayed_call_delay(&mut self) -> Option<u64> {
+        let h = host(&mut self.interp);
+        h.delayed_call.as_ref().and(h.delayed_ms)
+    }
+
+    /// The game's message for the "you lost" dialog, if it has one
+    /// (a Rusty Solitaire extension: the variable game-over-message).
+    pub fn game_over_message(&mut self) -> Option<String> {
+        match self.interp.global("game-over-message") {
+            Some(Value::Str(s)) if !s.is_empty() => Some(s.to_string()),
+            _ => None,
+        }
     }
 
     pub fn has_delayed_call(&mut self) -> bool {

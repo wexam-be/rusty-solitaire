@@ -5,7 +5,7 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Rusty Solitaire</name>
-  <summary>Play 91 different solitaire games</summary>
+  <summary>Play 91 different solitaire games, and Hearts</summary>
   <developer id="io.github.rustysolitaire">
     <name>The Rusty Solitaire authors</name>
   </developer>
@@ -14,6 +14,7 @@
       Rusty Solitaire is a collection of 91 solitaire card games, including
       Klondike, FreeCell, Spider, Golf, Yukon and Scorpion. It is a Rust port
       of GNOME AisleRiot and plays every game by AisleRiot's original rules.
+      It also has Hearts, played against three computer players.
     </p>
     <ul>
       <li>Hints, unlimited undo and redo, and game options for each game</li>
@@ -35,6 +36,11 @@
     <control>keyboard</control>
   </supports>
   <releases>
+    <release version="0.6.0" date="2026-11-03">
+      <description>
+        <p>Hearts, played against three computer players.</p>
+      </description>
+    </release>
     <release version="0.5.0" date="2026-10-29">
       <description>
         <p>A new application icon: a fan of four cards in the Rusty Solitaire colours.</p>

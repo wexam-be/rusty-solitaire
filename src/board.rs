@@ -9,21 +9,24 @@
 // Copyright (C) 2026 The Rusty Solitaire authors (Rust port)
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+use std::collections::HashMap;
 use std::time::Duration;
 
 use web_time::Instant;
 
-use resvg::tiny_skia::{Color, FilterQuality, Paint, Pattern, Pixmap, PixmapPaint, Rect, SpreadMode, Transform};
+use resvg::tiny_skia::{Color, FilterQuality, Paint, Pattern, Pixmap, PixmapMut, PixmapPaint, Rect, SpreadMode, Transform};
 
 use crate::card::Card;
 use crate::game::{Expansion, Game, Slot};
-use crate::theme::CardImages;
+use crate::theme::{render_text, CardImages};
 
 // Style defaults from ar-style-private.h.
 const CARD_SLOT_RATIO: f64 = 0.95;
 const CARD_OVERHANG: f64 = 0.0;
 const CARD_STEP: f64 = 0.2;
 const MIN_DELTA: f64 = 0.05;
+/// How far below a fanned card its pivot is, in card heights.
+const FAN_RADIUS: f32 = 1.3;
 /// rgb(0%, 31%, 6%)
 const BACKGROUND: (u8, u8, u8) = (0, 79, 15);
 /// GTK's defaults for gtk-double-click-time and gtk-dnd-drag-threshold.
@@ -162,6 +165,8 @@ pub struct Board {
     /// Physical pixels per logical pixel (200% display scaling = 2.0).
     pub scale: f32,
     background: Option<Pixmap>,
+    /// The game's labels, drawn: by text, pixel size, align and highlight.
+    label_images: HashMap<(String, u32, i8, bool), Option<(Pixmap, i32, i32)>>,
 }
 
 impl Board {
@@ -200,6 +205,7 @@ impl Board {
             cursor: Cursor::Default,
             scale: 1.0,
             background: None,
+            label_images: HashMap::new(),
         }
     }
 
@@ -245,11 +251,12 @@ impl Board {
         &self,
         x: i32,
         y: i32,
+        (card_w, card_h): (i32, i32),
         expansion: Expansion,
         (max_dx, max_dy): (Option<f64>, Option<f64>),
         n_cards: usize,
     ) -> SlotGeom {
-        let (cw, ch) = (self.card_w as f64, self.card_h as f64);
+        let (cw, ch) = (card_w as f64, card_h as f64);
         let mut g = SlotGeom { x, y, ..Default::default() };
         let mut pixeldx = 0;
         if n_cards > 1 {
@@ -276,15 +283,58 @@ impl Board {
             g.exposed = 1;
         }
         let delta = g.exposed.saturating_sub(1) as i32;
-        g.w = self.card_w + delta * pixeldx;
-        g.h = self.card_h + delta * g.pixeldy;
+        g.w = card_w + delta * pixeldx;
+        g.h = card_h + delta * g.pixeldy;
         g
     }
 
+    /// The size of the cards in `slot` (set-slot-scale! makes them smaller).
+    fn slot_card_size(&self, slot: &Slot) -> (i32, i32) {
+        if slot.scale >= 1.0 {
+            return (self.card_w, self.card_h);
+        }
+        let scaled = |n: i32| ((n as f64 * slot.scale).round() as i32).max(1);
+        (scaled(self.card_w), scaled(self.card_h))
+    }
+
     fn slot_geometry(&self, slot: &Slot) -> SlotGeom {
-        let x = (self.xslotstep * slot.x) as i32 + self.xoffset + self.xbaseoffset;
-        let y = (self.yslotstep * slot.y) as i32 + self.yoffset;
-        self.geometry_at(x, y, slot.expansion, (slot.dx, slot.dy), slot.cards.len())
+        // Smaller cards sit in the middle of where a full-size one would.
+        let (cw, ch) = self.slot_card_size(slot);
+        let x = (self.xslotstep * slot.x) as i32 + self.xoffset + self.xbaseoffset + (self.card_w - cw) / 2;
+        let y = (self.yslotstep * slot.y) as i32 + self.yoffset + (self.card_h - ch) / 2;
+        let mut g = self.geometry_at(x, y, (cw, ch), slot.expansion, (slot.dx, slot.dy), slot.cards.len());
+        if slot.centered {
+            g.x -= (g.w - cw) / 2;
+            g.y -= (g.h - ch) / 2;
+        }
+        if slot.fan.is_some() {
+            // A fan takes clicks anywhere around its middle.
+            let r = cw.max(ch);
+            g = SlotGeom { x: x + cw / 2 - r, y: y + ch / 2 - r, w: 2 * r, h: 2 * r, exposed: 1, ..g };
+        }
+        g
+    }
+
+    /// Where each card of a fanned slot goes: the transform from the card
+    /// image's pixels to the board's.
+    fn fan_transforms(&self, slot: &Slot, g: &SlotGeom, image: (u32, u32)) -> Vec<Transform> {
+        let Some((spread, rotation)) = slot.fan else { return Vec::new() };
+        let (cw, ch) = self.slot_card_size(slot);
+        let (cw, ch) = (cw as f32, ch as f32);
+        let (cx, cy) = ((g.x + g.w / 2) as f32, (g.y + g.h / 2) as f32);
+        let radius = ch * FAN_RADIUS;
+        let n = slot.cards.len();
+        (0..n)
+            .map(|k| {
+                let angle = if n > 1 { -spread / 2.0 + spread * k as f64 / (n - 1) as f64 } else { 0.0 };
+                Transform::from_translate(cx, cy)
+                    .pre_concat(Transform::from_rotate(rotation as f32))
+                    .pre_translate(0.0, radius)
+                    .pre_concat(Transform::from_rotate(angle as f32))
+                    .pre_translate(-cw / 2.0, -radius - ch / 2.0)
+                    .pre_scale(cw / image.0 as f32, ch / image.1 as f32)
+            })
+            .collect()
     }
 
     fn drag_geometry(&self, drag: &Drag) -> SlotGeom {
@@ -296,7 +346,8 @@ impl Board {
             e => e,
         };
         let overrides = (drag.dx, drag.dy);
-        let mut g = self.geometry_at(self.xoffset + self.xbaseoffset, self.yoffset, expansion, overrides, drag.cards.len());
+        let size = (self.card_w, self.card_h);
+        let mut g = self.geometry_at(self.xoffset + self.xbaseoffset, self.yoffset, size, expansion, overrides, drag.cards.len());
         g.x = drag.x;
         g.y = drag.y;
         g
@@ -423,6 +474,11 @@ impl Board {
             self.status = ClickStatus::None;
             // Otherwise three clicks would count as two double clicks.
             self.last_click.left = false;
+            // button-pressed is how a game learns which card was clicked
+            // (Hearts plays the card itself on a click).
+            if let Some(c) = card {
+                game.drag_valid(slot, c);
+            }
             game.double_click(slot);
             out.autoplay = game.has_delayed_call();
             self.cursor = Cursor::Open;
@@ -1014,6 +1070,10 @@ impl Board {
             return out;
         }
         game.start();
+        // Tell the game which card has the focus, as a press would.
+        if card >= 0 && card < Self::slot_len(game, s) {
+            game.drag_valid(s, card as usize);
+        }
         if ctrl {
             game.double_click(s);
             out.autoplay = game.has_delayed_call();
@@ -1045,9 +1105,10 @@ impl Board {
         let slot = game.table.slots.get(s)?;
         let g = self.slot_geometry(slot);
         let first = slot.cards.len() as i32 - g.exposed as i32;
-        let (x, y, w, h) = if card >= 0 && card >= first {
+        let (cw, ch) = self.slot_card_size(slot);
+        let (x, y, w, h) = if card >= 0 && card >= first && slot.fan.is_none() {
             let delta = card - first;
-            (g.x + delta * g.pixeldx, g.y + delta * g.pixeldy, self.card_w, self.card_h)
+            (g.x + delta * g.pixeldx, g.y + delta * g.pixeldy, cw, ch)
         } else {
             (g.x, g.y, g.w, g.h)
         };
@@ -1092,15 +1153,19 @@ impl Board {
         if !self.ready() || images.width as i32 != self.card_w || images.height as i32 != self.card_h {
             return;
         }
-        let mut draw = |image: &Pixmap, x: i32, y: i32| blit(out, w, h, image, x, y);
-
         let slots = &game.table.slots;
         let geoms: Vec<SlotGeom> = slots.iter().map(|s| self.slot_geometry(s)).collect();
+        let sizes: Vec<(i32, i32)> = slots.iter().map(|s| self.slot_card_size(s)).collect();
 
         // Empty slots first, so they never cover cards.
         for (i, slot) in slots.iter().enumerate() {
-            if slot.cards.is_empty() {
-                draw(images.slot(self.highlight == Some(i)), geoms[i].x, geoms[i].y);
+            if slot.cards.is_empty() && !slot.hide_empty {
+                let (x, y) = if slot.fan.is_some() {
+                    (geoms[i].x + (geoms[i].w - sizes[i].0) / 2, geoms[i].y + (geoms[i].h - sizes[i].1) / 2)
+                } else {
+                    (geoms[i].x, geoms[i].y)
+                };
+                draw_scaled(out, w, h, images.slot(self.highlight == Some(i)), x, y, sizes[i]);
             }
         }
 
@@ -1110,6 +1175,13 @@ impl Board {
                 continue;
             }
             let g = geoms[i];
+            if slot.fan.is_some() {
+                let back = images.card(&slot.cards[0], false);
+                for (card, t) in slot.cards.iter().zip(self.fan_transforms(slot, &g, (back.width(), back.height()))) {
+                    draw_transformed(out, w, h, images.card(card, self.highlight == Some(i)), t);
+                }
+                continue;
+            }
             let highlight_from = if self.highlight == Some(i) {
                 n - 1
             } else if self.show_selection && self.selection.map(|(s, _)| s) == Some(i) {
@@ -1120,7 +1192,7 @@ impl Board {
             let first = n - g.exposed;
             for (k, card) in slot.cards[first..].iter().enumerate() {
                 let image = images.card(card, first + k >= highlight_from);
-                draw(image, g.x + k as i32 * g.pixeldx, g.y + k as i32 * g.pixeldy);
+                draw_scaled(out, w, h, image, g.x + k as i32 * g.pixeldx, g.y + k as i32 * g.pixeldy, sizes[i]);
             }
         }
 
@@ -1128,16 +1200,43 @@ impl Board {
             let g = geoms[slot];
             let n = slots[slot].cards.len();
             let first = n - g.exposed;
-            if card >= first && card < n {
+            if card >= first && card < n && slots[slot].fan.is_none() {
                 let k = (card - first) as i32;
-                draw(images.card(&slots[slot].cards[card], false), g.x + k * g.pixeldx, g.y + k * g.pixeldy);
+                let image = images.card(&slots[slot].cards[card], false);
+                draw_scaled(out, w, h, image, g.x + k * g.pixeldx, g.y + k * g.pixeldy, sizes[slot]);
             }
         }
+
+        self.paint_labels(game, out);
 
         if self.drag.is_none() {
             if let Some((x, y, rw, rh)) = self.focus_rect(game) {
                 let line = (self.scale.round() as i32).max(1);
                 dashed_outline(out, w, h, (x, y, rw, rh), line);
+            }
+        }
+    }
+
+    /// The game's text on the table (set-table-labels!).
+    fn paint_labels(&mut self, game: &Game, out: &mut [u8]) {
+        if game.table.labels.is_empty() {
+            return;
+        }
+        if self.label_images.len() > 256 {
+            self.label_images.clear();
+        }
+        let (w, h) = (self.width.max(1), self.height.max(1));
+        for label in &game.table.labels {
+            let size = (label.size * self.yslotstep).round().max(1.0) as u32;
+            let key = (label.text.clone(), size, label.align, label.highlight);
+            let image = self
+                .label_images
+                .entry(key)
+                .or_insert_with(|| render_text(&label.text, size, label.align, label.highlight));
+            if let Some((pixmap, ax, ay)) = image {
+                let x = (self.xslotstep * label.x) as i32 + self.xbaseoffset - *ax;
+                let y = (self.yslotstep * label.y) as i32 - *ay;
+                blit(out, w, h, pixmap, x, y);
             }
         }
     }
@@ -1206,6 +1305,26 @@ fn dashed_outline(dst: &mut [u8], w: i32, h: i32, (x, y, rw, rh): (i32, i32, i32
             plot(x + t, py, py - y);
             plot(x + rw - 1 - t, py, py - y);
         }
+    }
+}
+
+/// Draw `image` at (x, y) at `size`, scaling it if it isn't that size.
+fn draw_scaled(dst: &mut [u8], w: i32, h: i32, image: &Pixmap, x: i32, y: i32, (sw, sh): (i32, i32)) {
+    let (iw, ih) = (image.width() as i32, image.height() as i32);
+    if (sw, sh) == (iw, ih) {
+        blit(dst, w, h, image, x, y);
+    } else {
+        let t = Transform::from_translate(x as f32, y as f32).pre_scale(sw as f32 / iw as f32, sh as f32 / ih as f32);
+        draw_transformed(dst, w, h, image, t);
+    }
+}
+
+/// Draw `image` onto an RGBA buffer through a transform (scaled or turned
+/// cards), smoothly.
+fn draw_transformed(dst: &mut [u8], w: i32, h: i32, image: &Pixmap, t: Transform) {
+    if let Some(mut target) = PixmapMut::from_bytes(dst, w as u32, h as u32) {
+        let paint = PixmapPaint { quality: FilterQuality::Bicubic, ..Default::default() };
+        target.draw_pixmap(0, 0, image.as_ref(), &paint, t, None);
     }
 }
 

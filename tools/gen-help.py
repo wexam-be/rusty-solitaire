@@ -31,10 +31,12 @@ OUT = APP / "assets/help/rules.html"
 
 
 def help_file(game):
+    # Games that AisleRiot doesn't have keep their page in assets/help/games.
     for name in (game.replace("-", "_"), game):
-        path = HELP / f"{name}.xml"
-        if path.exists():
-            return path
+        for folder in (APP / "assets/help/games", HELP):
+            path = folder / f"{name}.xml"
+            if path.exists():
+                return path
     raise SystemExit(f"no help page for {game}")
 
 

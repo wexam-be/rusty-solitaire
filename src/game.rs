@@ -76,6 +76,30 @@ pub struct Slot {
     /// Fan spacing set by the game (set-slot-x/y-expansion!), in card units.
     pub dx: Option<f64>,
     pub dy: Option<f64>,
+    /// Rusty Solitaire extensions, set by the game: the size of the cards
+    /// relative to the others (set-slot-scale!), the cards spread in a
+    /// fan, as (spread, rotation) in degrees (set-slot-fan!), and no outline
+    /// when the slot is empty (hide-empty-slot!); and the slot's cards
+    /// centred on its position rather than starting there (center-slot!).
+    pub scale: f64,
+    pub fan: Option<(f64, f64)>,
+    pub hide_empty: bool,
+    pub centered: bool,
+}
+
+/// Text the game puts on the table (set-table-labels!).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Label {
+    /// Where the text goes, in card-sized units; `y` is its middle.
+    pub x: f64,
+    pub y: f64,
+    pub text: String,
+    /// Which end of the text is at `x`: -1 left, 0 centre, 1 right.
+    pub align: i8,
+    /// Text height in card-sized units.
+    pub size: f64,
+    /// Bold and in a brighter colour.
+    pub highlight: bool,
 }
 
 /// Everything about the cards on the table.
@@ -84,6 +108,7 @@ pub struct Table {
     pub slots: Vec<Slot>,
     pub score: String,
     pub status_message: String,
+    pub labels: Vec<Label>,
     /// Size of the playing area in card-sized units.
     pub width: f64,
     pub height: f64,
@@ -325,6 +350,15 @@ impl Game {
     /// Whether the game asked to be called back shortly (autoplay).
     pub fn has_delayed_call(&mut self) -> bool {
         self.rules.has_delayed_call()
+    }
+
+    /// How long to wait before the pending delayed call, if the game said.
+    pub fn delayed_call_delay(&mut self) -> Option<Duration> {
+        self.rules.delayed_call_delay().map(Duration::from_millis)
+    }
+
+    pub fn game_over_message(&mut self) -> Option<String> {
+        self.rules.game_over_message()
     }
 
     pub fn cancel_delayed_call(&mut self) {

@@ -44,6 +44,39 @@ fn parse(data: &[u8]) -> Option<usvg::Tree> {
     usvg::Tree::from_data(data, &options).ok()
 }
 
+/// A line of text for the table (a game's labels), white with a soft
+/// shadow, `size` pixels high. Returns the image and the point in it that
+/// goes at the label's position: the left end, middle or right end of the
+/// text (`align` -1, 0, 1), halfway up.
+pub fn render_text(text: &str, size: u32, align: i8, highlight: bool) -> Option<(Pixmap, i32, i32)> {
+    let size = size.max(6) as f32;
+    let width = (size * (0.62 * text.chars().count() as f32 + 1.0)).ceil();
+    let height = (size * 1.5).ceil();
+    let pad = size * 0.25;
+    let (anchor_x, anchor) = match align {
+        -1 => (pad, "start"),
+        0 => (width / 2.0, "middle"),
+        _ => (width - pad, "end"),
+    };
+    let baseline = height / 2.0 + size * 0.36;
+    let escaped = text.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;");
+    let (fill, weight) = if highlight { ("#ffe27a", "bold") } else { ("#ffffff", "normal") };
+    let shadow = (size / 14.0).max(1.0);
+    let svg = format!(
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}">
+<g font-family="Cantarell" font-size="{size}" font-weight="{weight}" text-anchor="{anchor}">
+<text x="{sx}" y="{sy}" fill="#000000" fill-opacity="0.55">{escaped}</text>
+<text x="{anchor_x}" y="{baseline}" fill="{fill}">{escaped}</text>
+</g></svg>"##,
+        sx = anchor_x + shadow,
+        sy = baseline + shadow,
+    );
+    let tree = parse(svg.as_bytes())?;
+    let mut pixmap = Pixmap::new(width as u32, height as u32)?;
+    resvg::render(&tree, Transform::identity(), &mut pixmap.as_mut());
+    Some((pixmap, anchor_x as i32, (height / 2.0) as i32))
+}
+
 /// "anglo_poker.svgz" -> "Anglo Poker", as ar_filename_to_display_name does.
 pub fn display_name(file_name: &str) -> String {
     let base = file_name.split('.').next().unwrap_or(file_name);
