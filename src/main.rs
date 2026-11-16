@@ -840,6 +840,8 @@ impl Ui {
                     Dialog::About,
                     &format!(
                         "{APP_NAME} {}\n\n\
+                         Developed by Eric De Pessemier\n\
+                         Copyright © 2026 Eric De Pessemier\n\
                          Copyright © 2026 The Rusty Solitaire authors\n\n\
                          Based on GNOME AisleRiot by Jonathan Blandford, Felix Bellaby,\n\
                          Rosanna Yuen, Callum McKenzie, Vincent Povirk and many others.\n\n\

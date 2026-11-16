@@ -513,6 +513,7 @@ def credits_page(info):
 manual are the work of the people below, who made AisleRiot from 1998 on. AisleRiot is
 copyright © 1998–2006 Jonathan Blandford and © 2007–2015 Christian Persch, and its games are copyright
 their authors.</p>
+<p>The Rust port was developed by <strong>Eric De Pessemier</strong>, © 2026 Eric De Pessemier.</p>
 <section id="credits--program">
 <h2>The program</h2>
 <ul>

@@ -31,6 +31,6 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
-    <string>Copyright © 2026 The Rusty Solitaire authors. Based on GNOME AisleRiot. GPL-3.0-or-later.</string>
+    <string>Copyright © 2026 Eric De Pessemier and the Rusty Solitaire authors. Based on GNOME AisleRiot. GPL-3.0-or-later.</string>
 </dict>
 </plist>

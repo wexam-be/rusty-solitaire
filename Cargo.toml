@@ -2,7 +2,7 @@
 name = "rusty-solitaire"
 version = "0.6.0"
 edition = "2024"
-authors = ["The Rusty Solitaire authors"]
+authors = ["Eric De Pessemier", "The Rusty Solitaire authors"]
 license = "GPL-3.0-or-later"
 description = "Rusty Solitaire: a cross-platform Rust port of GNOME Aisleriot Solitaire"
 publish = false
