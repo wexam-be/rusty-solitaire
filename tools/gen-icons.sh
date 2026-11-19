@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Renders the application icon files from the two master SVGs:
 #
-#   packaging/linux/io.github.rustysolitaire.RustySolitaire.svg   48 px and up
+#   packaging/linux/io.github.wexam_be.RustySolitaire.svg   48 px and up
 #   assets/icons/rusty-solitaire-small.svg                        16-32 px, simplified
 #
 # into assets/icons/aisleriot-256.png (window icon, Linux packages, Flatpak)
@@ -17,7 +17,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-big=packaging/linux/io.github.rustysolitaire.RustySolitaire.svg
+big=packaging/linux/io.github.wexam_be.RustySolitaire.svg
 small=assets/icons/rusty-solitaire-small.svg
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT

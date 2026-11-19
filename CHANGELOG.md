@@ -2,7 +2,7 @@
 
 Every bug fix or improvement raises the minor version. The version is set in
 `Cargo.toml`; add a matching `<release>` to
-`packaging/linux/io.github.rustysolitaire.RustySolitaire.metainfo.xml`.
+`packaging/linux/io.github.wexam_be.RustySolitaire.metainfo.xml`.
 
 ## 0.6.0 — 2026-11-03
 
@@ -15,6 +15,12 @@ Every bug fix or improvement raises the minor version. The version is set in
   The computer players get random names and hold their cards in small
   fans; the trick is played in the middle, and the score table is on the
   table in the top left corner.
+- New application ID `io.github.wexam_be.RustySolitaire`, after the
+  GitHub account `rustysolitaire` became `wexam-be` (desktop entry, icons,
+  Flatpak, macOS bundle). The Flatpak installs as a new app next to the
+  old one, with fresh settings and statistics; uninstall the old one in
+  your software centre. The .deb, .rpm, Windows and macOS versions keep
+  their settings.
 - Return on a focused card, and double clicks, now tell the game which
   card was meant.
 

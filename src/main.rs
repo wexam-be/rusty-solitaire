@@ -51,8 +51,9 @@ const MAX_RECENT: usize = 5;
 
 const DEFAULT_GAME: &str = "klondike";
 const APP_NAME: &str = "Rusty Solitaire";
-/// Desktop/Flatpak application ID (reverse-DNS of github.com/rustysolitaire).
-const APP_ID: &str = "io.github.rustysolitaire.RustySolitaire";
+/// Desktop/Flatpak application ID (reverse-DNS of github.com/wexam-be; an ID
+/// can't contain a hyphen, so it becomes wexam_be).
+const APP_ID: &str = "io.github.wexam_be.RustySolitaire";
 
 struct App {
     game: Game,
@@ -981,7 +982,7 @@ impl Ui {
 
 fn main() -> Result<(), slint::PlatformError> {
     let window = AppWindow::new()?;
-    // Lets Linux desktops match the window to io.github.rustysolitaire.RustySolitaire.desktop
+    // Lets Linux desktops match the window to io.github.wexam_be.RustySolitaire.desktop
     // (its name and icon in the dock / task switcher). Needs the platform
     // that creating the window sets up, and must come before it is shown.
     // Only cosmetic, so a failure must not stop the game from starting.

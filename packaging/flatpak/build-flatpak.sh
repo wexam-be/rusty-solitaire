@@ -17,7 +17,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-APP_ID=io.github.rustysolitaire.RustySolitaire
+APP_ID=io.github.wexam_be.RustySolitaire
 RUNTIME=org.freedesktop.Platform
 RUNTIME_BRANCH=26.08
 VERSION=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
@@ -71,7 +71,7 @@ EOF
 
     # Sandbox: a window on Wayland or X11, the GPU and sound output. No
     # files, network or other devices; settings live in
-    # ~/.var/app/io.github.rustysolitaire.RustySolitaire. The help opens in
+    # ~/.var/app/io.github.wexam_be.RustySolitaire. The help opens in
     # the browser through the desktop portal.
     flatpak build-finish "$build" \
         --command=rusty-solitaire \

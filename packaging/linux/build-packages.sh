@@ -17,14 +17,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-APP_ID=io.github.rustysolitaire.RustySolitaire
+APP_ID=io.github.wexam_be.RustySolitaire
 NAME=rusty-solitaire
 VERSION=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
 . packaging/release-flags.sh
 release_flags
 RELEASE=1
-HOMEPAGE=https://github.com/rustysolitaire/rusty-solitaire
-MAINTAINER="The Rusty Solitaire authors <349638865+rustysolitaire@users.noreply.github.com>"
+HOMEPAGE=https://github.com/wexam-be/rusty-solitaire
+MAINTAINER="The Rusty Solitaire authors <349638865+wexam-be@users.noreply.github.com>"
 SUMMARY="Play 91 different solitaire card games"
 DESCRIPTION="Rusty Solitaire is a collection of 91 solitaire card games, including
 Klondike, FreeCell, Spider, Golf, Yukon and Scorpion. It is a Rust port of

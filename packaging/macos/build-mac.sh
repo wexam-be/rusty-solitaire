@@ -36,7 +36,7 @@ SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o Serv
 # can't rasterise SVG without extra tools). rsvg-convert (apt install
 # librsvg2-bin), because ImageMagick's own SVG renderer draws it wrong.
 mkdir -p target/macos dist
-rsvg-convert -w 1024 -h 1024 packaging/linux/io.github.rustysolitaire.RustySolitaire.svg \
+rsvg-convert -w 1024 -h 1024 packaging/linux/io.github.wexam_be.RustySolitaire.svg \
     -o target/macos/icon-1024.png
 
 echo "Copying the source to $MAC..."

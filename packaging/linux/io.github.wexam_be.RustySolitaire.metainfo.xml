@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (C) 2026 The Rusty Solitaire authors -->
 <component type="desktop-application">
-  <id>io.github.rustysolitaire.RustySolitaire</id>
+  <id>io.github.wexam_be.RustySolitaire</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Rusty Solitaire</name>
   <summary>Play 91 different solitaire games, and Hearts</summary>
-  <developer id="io.github.rustysolitaire">
+  <developer id="io.github.wexam_be">
     <name>Eric De Pessemier and the Rusty Solitaire authors</name>
   </developer>
   <description>
@@ -23,9 +23,9 @@
       <li>26 card designs to choose from</li>
     </ul>
   </description>
-  <url type="homepage">https://github.com/rustysolitaire/rusty-solitaire</url>
-  <url type="bugtracker">https://github.com/rustysolitaire/rusty-solitaire/issues</url>
-  <launchable type="desktop-id">io.github.rustysolitaire.RustySolitaire.desktop</launchable>
+  <url type="homepage">https://github.com/wexam-be/rusty-solitaire</url>
+  <url type="bugtracker">https://github.com/wexam-be/rusty-solitaire/issues</url>
+  <launchable type="desktop-id">io.github.wexam_be.RustySolitaire.desktop</launchable>
   <categories>
     <category>Game</category>
     <category>CardGame</category>
@@ -39,6 +39,7 @@
     <release version="0.6.0" date="2026-11-03">
       <description>
         <p>Hearts, played against three computer players.</p>
+        <p>New application ID io.github.wexam_be.RustySolitaire: the Flatpak installs as a new app, with fresh settings.</p>
       </description>
     </release>
     <release version="0.5.0" date="2026-10-29">

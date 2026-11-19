@@ -15,7 +15,7 @@
     <key>CFBundleIconFile</key>
     <string>RustySolitaire</string>
     <key>CFBundleIdentifier</key>
-    <string>io.github.rustysolitaire.RustySolitaire</string>
+    <string>io.github.wexam_be.RustySolitaire</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>

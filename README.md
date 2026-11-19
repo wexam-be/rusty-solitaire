@@ -28,7 +28,7 @@ The version is set in one place, `Cargo.toml`; the packages, the About box, the 
 file details and the macOS bundle all take it from there. Every bug fix or improvement
 raises the minor version (0.1.0 → 0.2.0 → 0.3.0 …) and gets an entry in
 [CHANGELOG.md](CHANGELOG.md) and a `<release>` in
-`packaging/linux/io.github.rustysolitaire.RustySolitaire.metainfo.xml` (the Flatpak build checks this).
+`packaging/linux/io.github.wexam_be.RustySolitaire.metainfo.xml` (the Flatpak build checks this).
 
 ## Build and run
 
@@ -108,10 +108,10 @@ The runtimes don't have to be installed to build the bundles. Install one with
 flatpak install --user Rusty-Solitaire-<version>-x86_64.flatpak
 ```
 
-which adds **Rusty Solitaire** to the applications menu (app ID `io.github.rustysolitaire.RustySolitaire`).
+which adds **Rusty Solitaire** to the applications menu (app ID `io.github.wexam_be.RustySolitaire`).
 Flatpak downloads the Freedesktop 26.08 runtime from Flathub if it is missing. The app runs
 sandboxed with access only to its window and the GPU; its settings live in
-`~/.var/app/io.github.rustysolitaire.RustySolitaire`.
+`~/.var/app/io.github.wexam_be.RustySolitaire`.
 
 Without Flatpak, `cargo build --release --target aarch64-unknown-linux-gnu` gives a plain
 ARM64 program that needs only glibc 2.39 or newer.
@@ -182,7 +182,7 @@ python3 tools/gen-help.py ../reference/aisleriot-original/help/C
 
 ## Application icon
 
-The icon has two master SVGs: `packaging/linux/io.github.rustysolitaire.RustySolitaire.svg`
+The icon has two master SVGs: `packaging/linux/io.github.wexam_be.RustySolitaire.svg`
 for 48 px and up, and `assets/icons/rusty-solitaire-small.svg`, a simplified version for
 16–32 px. After changing either, run
 
